@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Airbnb Price Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+</head>
+<body>
+    <div class="logo-section">
+    <img class="logo" src="{{ url_for('static', filename='airbnb_logo.png') }}" alt="Airbnb Logo">
+    </div>
+
+    <div class="predictor-section">
+    <h1>Listing Price Predictor<br> (per night)</h1>
+    
+    <form action="/predict" method="post" id="prediction-form">
+        <label for="country">Country:</label>
+        <select id="country" name="country">
+            {% for country in country_options%}
+            <option value="{{ country }}">{{ country }}</option>
+            {% endfor %} 
+        </select><br><br>
+
+        <label for="city">City:</label>
+        <select id="city" name="city" data-options="{{ city_options }}">
+        </select><br><br>
+        
+        <label for="neighborhood_group">Neighborhood:</label>
+        <select id="neighborhood_group" name="neighborhood_group" data-options="{{ neighborhood_options }}">
+        </select><br><br>
+        
+        <label for="room_type">Room Type:</label>
+        <select id="room_type" name="room_type">
+            {% for room_type in room_types %}
+        <option value="{{ room_type }}">{{ room_type }}</option>
+        {% endfor %}
+        </select><br><br>
+        
+        <label for="bedrooms">Bedrooms:</label>
+        <input type="text" id="bedrooms" name="bedrooms" value="{{ input_bedrooms | default('') }}"><br><br>
+
+        <label for="beds">Beds:</label>
+        <input type="text" id="beds" name="beds" value="{{ input_beds | default('') }}"><br><br>
+
+        <label for="bath">Bathrooms:</label>
+        <input type="text" id="bath" name="bath" value="{{ input_bath | default('') }}"><br><br>
+        
+        <input type="submit" value="Predict">
+        <a href="/"><input type="button" value="Reset"></a>
+    </form>
+    
+    {% if predicted_price is not none %}
+    <h2>Predicted Price: €{{ predicted_price|round(2) }}</h2>
+    <p>Rental Details:</p>
+    <ul>
+        <li><strong>Country:</strong> {{ country }}</li>
+        <li><strong>City:</strong> {{ city }}</li>
+        <li><strong>Neighborhood:</strong> {{ input_neighborhood_group }}</li>
+        <li><strong>Room Type:</strong> {{ input_room_type }}</li>
+        <li><strong>Bedrooms:</strong> {{ input_bedrooms }}</li>
+        <li><strong>Beds:</strong> {{ input_beds }}</li>
+        <li><strong>Bathrooms:</strong> {{ input_bath }}</li>
+    </ul>
+    {% endif %}
+
+    <script>
+        // Store the initial form values when the page loads
+        var initialFormValues = document.getElementById("prediction-form").innerHTML;
+        // Populate city options based on selected country
+        document.getElementById("country").addEventListener("change", function() {
+        var selectedCountry = this.value;
+        var cityDropdown = document.getElementById("city");
+        var cityOptions = JSON.parse(cityDropdown.getAttribute("data-options"));
+        var selectedCityOptions = cityOptions[selectedCountry];
+        
+         // Populate city dropdown options
+         cityDropdown.innerHTML = "";
+        selectedCityOptions.forEach(function(city) {
+            var option = document.createElement("option");
+            option.value = city;
+            option.textContent = city;
+            cityDropdown.appendChild(option);
+        });
+
+           // Trigger change event to populate neighborhood options
+        cityDropdown.dispatchEvent(new Event("change"));
+        });
+
+        // Populate neighborhood options based on selected city
+    document.getElementById("city").addEventListener("change", function() {
+        var selectedCity = this.value;
+        var neighborhoodDropdown = document.getElementById("neighborhood_group");
+        var neighborhoodOptions = JSON.parse(neighborhoodDropdown.getAttribute("data-options"));
+        var selectedNeighborhoodOptions = neighborhoodOptions[selectedCity];
+        
+        // Populate neighborhood dropdown options
+        neighborhoodDropdown.innerHTML = "";
+        selectedNeighborhoodOptions.forEach(function(neighborhood) {
+            var option = document.createElement("option");
+            option.value = neighborhood;
+            option.textContent = neighborhood;
+            neighborhoodDropdown.appendChild(option);
+        });
+    });
+        // Reset the form
+        function resetForm() {
+            document.getElementById("prediction-form").innerHTML = initialFormValues;
+        }
+    </script>
+    </div>
+</body>
+</html>
+
