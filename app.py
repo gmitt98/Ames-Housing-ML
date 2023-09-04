@@ -22,6 +22,7 @@ column_order = ['lot_area', 'neighborhood', 'bldg_type', 'house_style', 'overall
 
 @app.route('/')
 def index():
+    overall_qual = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     house_style = ['Single Story', 'Two Story', 'Finished 1 1/2 Story',
                    'Split Foyer Style', 'Split Level Style', 'Unfinished 2 1/2 Story',
                    'Unfinished 1 1/2 Story', 'Finished 2 1/2 Story']
@@ -39,6 +40,7 @@ def index():
     default_garage = 0
 
     user_input = {
+        "overall_qual": overall_qual[0],
         "lot_area": default_lot_area,
         "house_style": house_style[0],
         "year_built": default_year_built,
@@ -53,6 +55,7 @@ def index():
     }
 
     return render_template('index.html',
+                           overall_qual=overall_qual,
                            lot_area=default_lot_area,
                            house_style=house_style,
                            year_built=default_year_built,
@@ -70,6 +73,7 @@ def index():
 def predict():
     # gather user input data
     user_input = {
+        "overall_qual": request.form["overall_qual"],
         "lot_area": float(request.form["lot_area"]),
         "house_style": request.form["house_style"],
         "year_built": int(request.form["year_built"]),
@@ -97,7 +101,7 @@ def predict():
                 user_input_df[column].fillna(mode_value, inplace=True)
             else:
                 user_input_df[column].fillna(mode_value, inplace=True)
-                
+
     # Perform model prediction
     prediction = model.predict(user_input_df)
 
@@ -106,6 +110,7 @@ def predict():
 
     return render_template('index.html',
                            predicted_price=result["prediction"],
+                           overall_qual=user_input["overall_qual"],
                            lot_area=user_input["lot_area"],
                            house_style=user_input["house_style"],
                            year_built=user_input["year_built"],
